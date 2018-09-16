@@ -8,20 +8,27 @@ import java.awt.*;
  *
  */
 public abstract class AbstractFigure implements Figure {
-	private int[][] v_matrix;// = new int[3][2];
-	private int[][] h_matrix;// = new int[2][3];
+	private Cube[][] v_matrix;// = new int[3][2];
+	private Cube[][] h_matrix;// = new int[2][3];
 	boolean horizontal = true;
 	private int x = 3;
 	private int y = 0;
 	
 	public AbstractFigure() {}
 	
-	public AbstractFigure(int[][] mt) {
-		h_matrix = mt;
-		v_matrix = new int[mt[0].length][mt.length];
+	public AbstractFigure(int[][] mt, Color color) {
+		
+		h_matrix = new Cube[mt.length][mt[0].length];
+		v_matrix = new Cube[mt[0].length][mt.length];
+		
+		for (int i = 0; i < mt.length; i++)
+			for (int j = 0; j < mt[0].length; j++)
+				if (mt[i][j] == 1)
+					h_matrix[i][j] = new Cube(color);
+		
 	}
 	
-	public int[][] getMatrix() {
+	public Cube[][] getMatrix() {
 		if (horizontal)
 			return h_matrix;
 		else 
@@ -48,34 +55,7 @@ public abstract class AbstractFigure implements Figure {
 			x = 10 - v_matrix[0].length - 1;
 		}
 	}
-	
-	/**
-	 * Rotates figure matrix and return copy of it, but don't saves rotation changes in figure matrix.
-	 * @return Copy of rotated matrix.
-	 */
-	/*
-	public int[][] createMemento() {
-		int[][] tmp;
-		if (horizontal) {
-			tmp = new int[h_matrix[0].length][h_matrix.length];
-			for (int i = 0, n = h_matrix.length; i < n; i++)
-				for (int j = 0, m = h_matrix[0].length; j < m; j++)
-					tmp[j][n-i-1] = h_matrix[i][j];
-		} else {
-			tmp = new int[v_matrix[0].length][v_matrix.length];
-			for (int i = 0, n = v_matrix.length; i < n; i++)
-				for (int j = 0, m = v_matrix[0].length; j < m; j++)
-					tmp[j][n-i-1] = v_matrix[i][j];
-		}
-		horizontal = !horizontal;
 		
-		// checking if the figure is not out of the screen
-		if (horizontal && x + tmp[0].length >= 10) {
-			x = 10 - tmp[0].length - 1;
-		}
-		return 
-	}*/
-	
 	/**
 	 * Rotate the matrix -90 degree
 	 */
@@ -95,6 +75,10 @@ public abstract class AbstractFigure implements Figure {
 		if (horizontal && x + v_matrix[0].length >= 10) {
 			x = 10 - v_matrix[0].length - 1;
 		}
+	}
+	
+	public void pnt(Graphics g) {
+		g.drawString("Hello", 2, 2);
 	}
 	
 	public void moveLeft() {
@@ -130,8 +114,8 @@ public abstract class AbstractFigure implements Figure {
 	}
 	
 	private class Memento {
-		private int[][] vmt;
-		private int[][] hmt;
+		private Cube[][] vmt;
+		private Cube[][] hmt;
 		private boolean hor;
 		private int mx;
 		private int my;
@@ -144,11 +128,11 @@ public abstract class AbstractFigure implements Figure {
 			my = y;
 		}
 		
-		int[][] getVMatrix() {
+		Cube[][] getVMatrix() {
 			return vmt;
 		}
 		
-		int[][] getHMatrix() {
+		Cube[][] getHMatrix() {
 			return hmt;
 		}
 		

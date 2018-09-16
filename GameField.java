@@ -12,7 +12,7 @@ public class GameField extends JPanel {
 	private static final int WIDTH = 10 * BOX_WIDTH + 1;
 	private static final int HEIGHT = 20 * BOX_WIDTH + 1;
 	private Figure curFig = null;
-	private int[][] field = new int[20][10];
+	private Cube[][] field = new Cube[20][10];
 	Timer timer;
 	private static enum Direction {LEFT, RIGHT};
 	
@@ -85,7 +85,13 @@ public class GameField extends JPanel {
 	 */
 	private void gameOver() {
 		timer.stop();
-		System.out.println("SHOW \"GAME OVER\" SCRREN");
+		//int r = ;
+		if (JOptionPane.showConfirmDialog(this, "Do you want to play again?", "GAME OVER", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+			field = new Cube[20][10];
+			createFigure();
+			start();
+		} else 
+			System.exit(0);
 	}
 
 	/**
@@ -94,7 +100,7 @@ public class GameField extends JPanel {
 	public boolean canMoveDown() {
 		for (int i = 0; i < curFig.getMatrix().length; i++) {
 			for (int j = 0; j < curFig.getMatrix()[0].length; j++) {
-				if (curFig.getY()+i+1 >= 20 || curFig.getMatrix()[i][j] == 1 && field[curFig.getY()+i+1][curFig.getX()+j] == 1) {
+				if (curFig.getY()+i+1 >= 20 || curFig.getMatrix()[i][j] != null && field[curFig.getY()+i+1][curFig.getX()+j] != null) {
 					return false;
 				}
 			}
@@ -112,7 +118,8 @@ public class GameField extends JPanel {
 		
 		for (int i = 0; i < curFig.getMatrix().length; i++) {
 			for (int j = 0; j < curFig.getMatrix()[0].length; j++) {
-				if (curFig.getX()+j+shift < 0 || curFig.getX()+j+shift >= 10 || curFig.getMatrix()[i][j] == 1 && field[curFig.getY()+i][curFig.getX()+j+shift] == 1) {
+				if (curFig.getX()+j+shift < 0 || curFig.getX()+j+shift >= 10 || 
+						curFig.getMatrix()[i][j] != null && field[curFig.getY()+i][curFig.getX()+j+shift] != null) {
 					return false;
 				}
 			}
@@ -129,7 +136,7 @@ public class GameField extends JPanel {
 		curFig.rotate();
 		for (int i = 0; i < curFig.getMatrix().length; i++) {
 			for (int j = 0; j < curFig.getMatrix()[0].length; j++) {
-				if (curFig.getMatrix()[i][j] == 1 && field[curFig.getY()+i][curFig.getX()+j] == 1) {
+				if (curFig.getMatrix()[i][j] != null && field[curFig.getY()+i][curFig.getX()+j] != null) {
 					curFig.rotateBackward();
 					return false;
 				}
@@ -145,8 +152,8 @@ public class GameField extends JPanel {
 	private void addFigureToField() {
 		for (int i = 0; i < curFig.getMatrix().length; i++) {
 			for (int j = 0; j < curFig.getMatrix()[0].length; j++) {
-				if (curFig.getMatrix()[i][j] == 1) {
-					field[curFig.getY()+i][curFig.getX()+j] = 1;
+				if (curFig.getMatrix()[i][j] != null) {
+					field[curFig.getY()+i][curFig.getX()+j] = curFig.getMatrix()[i][j];
 				}
 			}
 		}
@@ -156,7 +163,7 @@ public class GameField extends JPanel {
 		for (int i = curFig.getY(); i < curFig.getY()+curFig.getMatrix().length; i++) {
 			boolean fullLine = true;
 			for (int j = 0; j < 10; j++) {
-				if (field[i][j] == 0) {
+				if (field[i][j] == null) {
 					fullLine = false;
 					break;
 				}
@@ -165,7 +172,7 @@ public class GameField extends JPanel {
 			if (fullLine) {
 				// clear ful line
 				for (int j = 0; j < 10; j++)
-					field[i][j] = 0;
+					field[i][j] = null;
 				// shift upper blocks down
 				for (int z = i; z > 0; z--) {
 					for (int j = 0; j < 10; j++)
@@ -203,8 +210,11 @@ public class GameField extends JPanel {
 		g.setColor(Color.BLACK);
 		for (int i = 0; i < curFig.getMatrix().length; i++) {
 			for (int j = 0; j < curFig.getMatrix()[0].length; j++) {
-				if (curFig.getMatrix()[i][j] == 1) {
+				if (curFig.getMatrix()[i][j] != null) {
+					g.setColor(curFig.getMatrix()[i][j].getColor());
 					g.fillRect(curFig.getX()*BOX_WIDTH + j*BOX_WIDTH, curFig.getY()*BOX_WIDTH + i*BOX_WIDTH, BOX_WIDTH, BOX_WIDTH);
+					g.setColor(Color.BLACK);
+					g.drawRect(curFig.getX()*BOX_WIDTH + j*BOX_WIDTH, curFig.getY()*BOX_WIDTH + i*BOX_WIDTH, BOX_WIDTH, BOX_WIDTH);
 				}
 			}
 		}
@@ -212,8 +222,11 @@ public class GameField extends JPanel {
 		// paint existing field
 		for (int i = 0; i < field.length; i++) {
 			for (int j = 0; j < field[0].length; j++) {
-				if (field[i][j] == 1) {
+				if (field[i][j] != null) {
+					g.setColor(field[i][j].getColor());
 					g.fillRect(j*BOX_WIDTH, i*BOX_WIDTH, BOX_WIDTH, BOX_WIDTH);
+					g.setColor(Color.BLACK);
+					g.drawRect(j*BOX_WIDTH, i*BOX_WIDTH, BOX_WIDTH, BOX_WIDTH);
 				}
 			}
 		}

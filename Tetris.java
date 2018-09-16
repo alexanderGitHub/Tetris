@@ -32,7 +32,7 @@ public class Tetris extends JFrame {
 	 * Start the game
 	 */
 	public void start() {
-		gf.start();
+		//gf.start();
 	}
 	
 	public static void main(String[] args) {
