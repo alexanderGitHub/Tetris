@@ -11,5 +11,4 @@ public interface Figure {
 	public void moveLeft();
 	public void moveRight();
 	public void moveDown();
-	public void pnt(Graphics g);
 }

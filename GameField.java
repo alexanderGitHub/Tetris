@@ -8,13 +8,19 @@ import javax.swing.*;
 
 public class GameField extends JPanel {
 	
-	private static final int BOX_WIDTH = 40;
+	public static final int BOX_WIDTH = 40;
 	private static final int WIDTH = 10 * BOX_WIDTH + 1;
 	private static final int HEIGHT = 20 * BOX_WIDTH + 1;
-	private Figure curFig = null;
-	private Cube[][] field = new Cube[20][10];
-	Timer timer;
 	private static enum Direction {LEFT, RIGHT};
+	
+	Timer timer;
+	JLabel helpLabel;
+	private Figure curFig, nextFig = null;
+	private Cube[][] field = new Cube[20][10];
+	
+	Random random = new Random();
+	NewFigureListener nfListener;
+	ScoreListener sListener;
 	
 	/**
 	 * Constructor. Createing new Figure and applying key listener
@@ -54,6 +60,17 @@ public class GameField extends JPanel {
 				else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
 					tick();
 				}
+				else if (e.getKeyCode() == KeyEvent.VK_F1) {
+					timer.stop();
+					if (helpLabel == null) {
+						helpLabel = new JLabel("<html>Thanks for playing this game.<br>Scores table:<br>"+ 
+								"1 line: 100 points;<br> lines: 300 points; 3 lines: 700 points;"+
+								"4 lines: 1500 points.<br>The speed of figures flow will be increased"+
+								"after 40 lines and then after each 10 lines more.<br>Have a nice time!</html>");
+					}
+					JOptionPane.showMessageDialog(GameField.this, helpLabel);
+					timer.start();
+				}
 			}
 		});
 	}
@@ -89,6 +106,7 @@ public class GameField extends JPanel {
 		if (JOptionPane.showConfirmDialog(this, "Do you want to play again?", "GAME OVER", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 			field = new Cube[20][10];
 			createFigure();
+			sListener.reset();
 			start();
 		} else 
 			System.exit(0);
@@ -181,24 +199,38 @@ public class GameField extends JPanel {
 				numFullLines++;
 			}
 		}
+		sListener.addLines(numFullLines);
 	}
 	
 	/**
 	 * Fabric method that creates a random Figure.
+	 * Sending nextFigure figure to nfListener so it's can be showed in the window of next figure.
 	 * After creating it checks if it is possible to move down. If not - game over
 	 */
 	private void createFigure() {
-		Random random = new Random();
+		curFig = nextFig;
+		
 		int tmp = random.nextInt(7);
 		switch(tmp) {
-			case 0: curFig = new TFigure(); break;
-			case 1: curFig = new LFigure(); break;
-			case 2: curFig = new BLFigure(); break;
-			case 3: curFig = new BFigure(); break;
-			case 4: curFig = new ZFigure(); break;
-			case 5: curFig = new BZFigure(); break;
-			case 6: curFig = new IFigure(); break;
+			case 0: nextFig = new TFigure(); break;
+			case 1: nextFig = new LFigure(); break;
+			case 2: nextFig = new BLFigure(); break;
+			case 3: nextFig = new BFigure(); break;
+			case 4: nextFig = new ZFigure(); break;
+			case 5: nextFig = new BZFigure(); break;
+			case 6: nextFig = new IFigure(); break;
 		}
+		
+		// if it is first figure, then next figure was null
+		if (curFig == null) {
+			createFigure();
+			return;
+		}
+		
+		// Tell NewFigListener about new next figure
+		if (nfListener != null)
+			nfListener.setFigure(nextFig);
+		
 		if (!canMoveDown())
 			gameOver();
 	}
@@ -206,8 +238,11 @@ public class GameField extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
+		// paint vertical right border
+		g.setColor(Color.black);
+		g.drawLine(this.getWidth()-1, 0, this.getWidth()-1, this.getHeight());
+		
 		// paint Figure
-		g.setColor(Color.BLACK);
 		for (int i = 0; i < curFig.getMatrix().length; i++) {
 			for (int j = 0; j < curFig.getMatrix()[0].length; j++) {
 				if (curFig.getMatrix()[i][j] != null) {
@@ -230,6 +265,37 @@ public class GameField extends JPanel {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Setting speed of the flow.
+	 * @param speed Speed that affect on the flow.
+	 */
+	public void setSpeed(int speed) {
+		timer.setDelay(1000 - 100*speed);
+	}
+	
+	/**
+	 * Setting a NewFigureListener object, so it's possible to show
+	 * the next figure on the right top corner.
+	 * @param nfListener
+	 */
+	public void setNfListener(NewFigureListener nfListener) {
+		this.nfListener = nfListener;
+		if (nextFig != null)
+			nfListener.setFigure(nextFig);
+	}
+	
+	/**
+	 * Setting ScoreListener, so it's possible to show statistics.
+	 * Also, current class sends this, so that is possible to encrease
+	 * the speed after some amount of full lines, that is controlled
+	 * by ScoreListener object. 
+	 * @param sListener
+	 */
+	public void setScoreListener(ScoreListener sListener) {
+		this.sListener = sListener;
+		sListener.setGameField(this);
 	}
 	
 	public Dimension getPreferredSize() {

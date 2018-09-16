@@ -3,19 +3,24 @@ package tetris;
 import java.awt.*;
 
 /**
- * Abstract class of the figure
+ * Abstract class of the figure.
  * @author Alex
  *
  */
 public abstract class AbstractFigure implements Figure {
-	private Cube[][] v_matrix;// = new int[3][2];
-	private Cube[][] h_matrix;// = new int[2][3];
+	private Cube[][] v_matrix;
+	private Cube[][] h_matrix;
 	boolean horizontal = true;
 	private int x = 3;
 	private int y = 0;
+	private int tmpX = 0; // temporary x position 
 	
-	public AbstractFigure() {}
-	
+	/**
+	 * Initialization of Figure from matrix received from parameter. 
+	 * The parameter have to always describe the horizontal figure matrix.
+	 * @param mt Matrix of horizontal positioned figure.
+	 * @param color Color of boxes the figure made.
+	 */
 	public AbstractFigure(int[][] mt, Color color) {
 		
 		h_matrix = new Cube[mt.length][mt[0].length];
@@ -28,6 +33,9 @@ public abstract class AbstractFigure implements Figure {
 		
 	}
 	
+	/**
+	 * @return matrix of the figure.
+	 */
 	public Cube[][] getMatrix() {
 		if (horizontal)
 			return h_matrix;
@@ -36,7 +44,7 @@ public abstract class AbstractFigure implements Figure {
 	}
 	
 	/**
-	 * Rotate the matrix 90 degree
+	 * Rotate the matrix 90 degree.
 	 */
 	public void rotate() {
 		if (horizontal) {
@@ -51,13 +59,14 @@ public abstract class AbstractFigure implements Figure {
 		horizontal = !horizontal;
 		
 		// checking if the figure is not out of the screen
-		if (horizontal && x + v_matrix[0].length >= 10) {
-			x = 10 - v_matrix[0].length - 1;
+		tmpX = x; // memorize current x before shifting
+		if (horizontal && x + h_matrix[0].length >= 10) {
+			x = 10 - h_matrix[0].length;
 		}
 	}
 		
 	/**
-	 * Rotate the matrix -90 degree
+	 * Rotate the matrix -90 degree.
 	 */
 	public void rotateBackward() {
 		if (horizontal) {
@@ -71,81 +80,44 @@ public abstract class AbstractFigure implements Figure {
 		}
 		horizontal = !horizontal;
 		
-		// checking if the figure is not out of the screen
-		if (horizontal && x + v_matrix[0].length >= 10) {
-			x = 10 - v_matrix[0].length - 1;
-		}
+		// restoring x position
+		x = tmpX;
 	}
 	
-	public void pnt(Graphics g) {
-		g.drawString("Hello", 2, 2);
-	}
-	
+	/**
+	 * Move left the figure that means to decrease x position of figure.
+	 */
 	public void moveLeft() {
 		if (x - 1 >= 0)
 			x--;
-		System.out.println(x);
 	}
 	
+	/**
+	 * Move right the figure that means to increase x position of figure.
+	 */
 	public void moveRight() {
 		if (x + (horizontal ? h_matrix[0].length : v_matrix[0].length) < 10)
 			x++;
-		System.out.println(x);
 	}
 	
+	/**
+	 * Move down the figure that means to increase y position of figure.
+	 */
 	public void moveDown() {
 		y++;
 	}
 	
+	/**
+	 * @Return y The x position of figure 
+	 */
 	public int getX() {
 		return x;
 	}
 
-	public void setX(int x) {
-		this.x = x;
-	}
-
+	/**
+	 * @Return y The y position of figure 
+	 */
 	public int getY() {
 		return y;
-	}
-
-	public void setY(int y) {
-		this.y = y;
-	}
-	
-	private class Memento {
-		private Cube[][] vmt;
-		private Cube[][] hmt;
-		private boolean hor;
-		private int mx;
-		private int my;
-		
-		public Memento() {
-			vmt = v_matrix;
-			hmt = h_matrix;
-			this.hor = horizontal;
-			mx = x;
-			my = y;
-		}
-		
-		Cube[][] getVMatrix() {
-			return vmt;
-		}
-		
-		Cube[][] getHMatrix() {
-			return hmt;
-		}
-		
-		boolean getHor() {
-			return hor;
-		}
-		
-		int getX() {
-			return mx;
-		}
-		
-		int getY() {
-			return my;
-		}
 	}
 }
